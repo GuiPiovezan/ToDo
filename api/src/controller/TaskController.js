@@ -1,20 +1,34 @@
-const TaskModel = require('../model/TaskModel');
+const TaskModel = require('../model/TaskModel')
 
-class TaskController { 
-    
-    async create(req, res){
+class TaskController {
+  async create(req, res) {
+    const task = new TaskModel(req.body)
 
-        const task = new TaskModel(req.body);
+    await task
+      .save()
+      .then(result => {
+        return res.status(200).json(result)
+      })
+      .catch(err => {
+        return res.status(500).json(err)
+      })
+  }
 
-        await task
-        .save()
-        .then(result => {
-            return res.status(200).json(result);
-        }).catch((err) => {
-            return res.status(500).json(err);
-        });
-    }
-
+  async update(req, res) {
+    await TaskModel.findByIdAndUpdate(
+      {
+        _id: req.params.id,
+      },
+      req.body,
+      { new: true },
+    )
+      .then(result => {
+        return res.status(200).json(result)
+      })
+      .catch(error => {
+        res.status(500).json(error)
+      })
+  }
 }
 
-module.exports = new TaskController();
+module.exports = new TaskController()
