@@ -1,4 +1,16 @@
 const TaskModel = require('../model/TaskModel')
+const {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} = require('date-fns')
+
+const now = new Date()
 
 class TaskController {
   async create(req, res) {
@@ -38,6 +50,111 @@ class TaskController {
       })
       .catch(error => {
         return res.status(500).json(error)
+      })
+  }
+
+  async show(req, res) {
+    await TaskModel.findById(req.params.id)
+      .then(response => {
+        if (response) return res.status(200).json(response)
+        else return res.status(404).json({ error: 'Tarefa não encontrada' })
+      })
+      .catch(error => {
+        return res.status(500).json(error)
+      })
+  }
+
+  async delete(req, res) {
+    await TaskModel.deleteOne({ _id: req.params.id })
+      .then(response => {
+        return res.status(200).json(response)
+      })
+      .catch(error => {
+        return res.status(500).json(error)
+      })
+  }
+
+  async done(req, res) {
+    await TaskModel.findByIdAndUpdate(
+      { _id: req.params.id },
+      { done: req.params.done },
+      { new: true },
+    )
+      .then(response => {
+        return res.status(200).json(response)
+      })
+      .catch(error => {
+        return res.status(500).json(error)
+      })
+  }
+
+  async late(req, res) {
+    await TaskModel.find({
+      when: { $lt: now },
+      macaddress: { $in: req.body.macaddress },
+    })
+      .sort('when')
+      .then(response => {
+        res.status(200).json(response)
+      })
+      .catch(error => {
+        res.status(500).json(error)
+      })
+  }
+
+  async today(req, res) {
+    await TaskModel.find({
+      macaddress: { $in: req.body.macaddress },
+      when: { $gte: startOfDay(now), $lte: endOfDay(now) },
+    })
+      .sort('when')
+      .then(response => {
+        res.status(200).json(response)
+      })
+      .catch(error => {
+        res.status(500).json(error)
+      })
+  }
+
+  async week(req, res) {
+    await TaskModel.find({
+      macaddress: { $in: req.body.macaddress },
+      when: { $gte: startOfWeek(now), $lte: endOfWeek(now) },
+    })
+      .sort('when')
+      .then(response => {
+        res.status(200).json(response)
+      })
+      .catch(error => {
+        res.status(500).json(error)
+      })
+  }
+
+  async month(req, res) {
+    await TaskModel.find({
+      macaddress: { $in: req.body.macaddress },
+      when: { $gte: startOfMonth(now), $lte: endOfMonth(now) },
+    })
+      .sort('when')
+      .then(response => {
+        res.status(200).json(response)
+      })
+      .catch(error => {
+        res.status(500).json(error)
+      })
+  }
+
+  async year(req, res) {
+    await TaskModel.find({
+      macaddress: { $in: req.body.macaddress },
+      when: { $gte: startOfYear(now), $lte: endOfYear(now) },
+    })
+      .sort('when')
+      .then(response => {
+        res.status(200).json(response)
+      })
+      .catch(error => {
+        res.status(500).json(error)
       })
   }
 }
